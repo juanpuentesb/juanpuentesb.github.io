@@ -338,26 +338,16 @@ img {
   opacity: 0.94;
 }
 
-.hero-route-detail {
+.hero-chart-detail {
   position: absolute;
   right: max(24px, calc((100% - 1120px) / 2));
   top: 26px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
   color: var(--green-deep);
   font-size: 0.7rem;
   font-weight: 900;
   letter-spacing: 0;
   opacity: 0.72;
-}
-
-.hero-route-line {
-  width: 58px;
-  height: 1px;
-  background: var(--green-deep);
-  transform: rotate(-8deg);
-  transform-origin: center;
+  text-transform: uppercase;
 }
 
 .hero-inner {
@@ -1779,7 +1769,7 @@ html[lang="en"] .profile-risk-original {
     width: 100%;
   }
 
-  .hero-route-detail {
+  .hero-chart-detail {
     display: none;
   }
 

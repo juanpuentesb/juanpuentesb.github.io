@@ -24,8 +24,7 @@ if (host && canvas) {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
     const world = new THREE.Group();
-    const pathGroup = new THREE.Group();
-    const globeGroup = new THREE.Group();
+    const chartGroup = new THREE.Group();
     const clock = new THREE.Clock();
     const pointer = new THREE.Vector2();
     const pointerTarget = new THREE.Vector2();
@@ -35,7 +34,7 @@ if (host && canvas) {
     let lastFrame = 0;
 
     scene.add(world);
-    world.add(pathGroup, globeGroup);
+    world.add(chartGroup);
     camera.position.set(0, 1.25, 9.6);
     camera.lookAt(0, -0.18, -0.8);
 
@@ -49,7 +48,6 @@ if (host && canvas) {
     const makeMaterials = () => {
       const green = readColor("--green", "#13c636");
       const deep = readColor("--green-deep", "#087a2a");
-      const surface = readColor("--surface-raised", "#f6fbf5");
 
       materials.green = new THREE.MeshStandardMaterial({
         color: green,
@@ -58,26 +56,27 @@ if (host && canvas) {
         metalness: 0.05,
         roughness: 0.5,
       });
-      materials.surface = new THREE.MeshStandardMaterial({
-        color: surface,
-        metalness: 0.04,
-        roughness: 0.62,
-        transparent: true,
-        opacity: 0.88,
-      });
-      materials.stepAccent = new THREE.MeshStandardMaterial({
+      materials.bar = new THREE.MeshStandardMaterial({
         color: green,
         emissive: green,
-        emissiveIntensity: 0.06,
+        emissiveIntensity: 0.035,
         metalness: 0.04,
-        roughness: 0.56,
+        roughness: 0.58,
         transparent: true,
-        opacity: 0.36,
+        opacity: 0.2,
       });
-      materials.stepEdge = new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.58 });
+      materials.barAccent = new THREE.MeshStandardMaterial({
+        color: green,
+        emissive: green,
+        emissiveIntensity: 0.08,
+        metalness: 0.04,
+        roughness: 0.52,
+        transparent: true,
+        opacity: 0.44,
+      });
+      materials.barEdge = new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.62 });
       materials.route = new THREE.MeshBasicMaterial({ color: green, transparent: true, opacity: 0.9 });
-      materials.routeGlow = new THREE.MeshBasicMaterial({ color: green, transparent: true, opacity: 0.12 });
-      materials.globe = new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.46 });
+      materials.routeGlow = new THREE.MeshBasicMaterial({ color: green, transparent: true, opacity: 0.18 });
     };
 
     makeMaterials();
@@ -87,98 +86,69 @@ if (host && canvas) {
     keyLight.position.set(-3, 7, 8);
     scene.add(keyLight);
 
-    const pathPoints = [];
-    const stepCount = compactViewport.matches ? 7 : 9;
-    for (let index = 0; index < stepCount; index += 1) {
-      const progress = index / (stepCount - 1);
-      const height = 0.22 + progress * 0.62;
-      const top = -1.45 + progress * 2.55;
-      const width = 0.94 - progress * 0.14;
-      const geometry = new THREE.BoxGeometry(width, height, 0.82);
-      const step = new THREE.Mesh(geometry, index % 3 === 2 ? materials.stepAccent : materials.surface);
-      step.position.set(0.2 + progress * 4.25, top - height / 2, 2.45 - progress * 6.3);
-      step.rotation.y = -0.09;
-      pathGroup.add(step);
+    const chartValues = compactViewport.matches
+      ? [0.48, 0.74, 0.63, 1.02, 0.9, 1.35, 1.72]
+      : [0.48, 0.74, 0.63, 1.02, 0.9, 1.32, 1.18, 1.58, 1.92];
+    const chartPoints = [];
+    const chartBase = -1.5;
+    const chartStart = -3.25;
+    const chartSpacing = compactViewport.matches ? 0.92 : 0.82;
 
-      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geometry), materials.stepEdge);
-      edges.position.copy(step.position);
-      edges.rotation.copy(step.rotation);
-      pathGroup.add(edges);
-      pathPoints.push(new THREE.Vector3(step.position.x, top + 0.12, step.position.z));
-    }
+    chartValues.forEach((value, index) => {
+      const progress = index / (chartValues.length - 1);
+      const height = value * 1.38;
+      const geometry = new THREE.BoxGeometry(0.54, height, 0.68);
+      const material = index === chartValues.length - 1 ? materials.barAccent : materials.bar;
+      const bar = new THREE.Mesh(geometry, material);
+      bar.position.set(chartStart + index * chartSpacing, chartBase + height / 2, 1.25 - progress * 2.7);
+      bar.rotation.y = -0.08;
+      chartGroup.add(bar);
 
-    const growthCurve = new THREE.CatmullRomCurve3(pathPoints);
+      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geometry), materials.barEdge);
+      edges.position.copy(bar.position);
+      edges.rotation.copy(bar.rotation);
+      chartGroup.add(edges);
+      chartPoints.push(new THREE.Vector3(bar.position.x, chartBase + height + 0.1, bar.position.z));
+    });
+
+    const growthCurve = new THREE.CatmullRomCurve3(chartPoints, false, "catmullrom", 0.22);
     const growthGlow = new THREE.Mesh(
-      new THREE.TubeGeometry(growthCurve, 80, 0.095, 7, false),
+      new THREE.TubeGeometry(growthCurve, 96, 0.105, 7, false),
       materials.routeGlow,
     );
-    pathGroup.add(growthGlow);
+    chartGroup.add(growthGlow);
     const growthPath = new THREE.Mesh(
-      new THREE.TubeGeometry(growthCurve, 80, 0.045, 7, false),
+      new THREE.TubeGeometry(growthCurve, 96, 0.044, 7, false),
       materials.route,
     );
-    pathGroup.add(growthPath);
-    pathGroup.position.set(-2.45, -0.08, 0);
+    chartGroup.add(growthPath);
+    chartGroup.position.set(0.55, -0.03, 0);
 
     const growthMarker = new THREE.Mesh(
       new THREE.OctahedronGeometry(0.12, 0),
       materials.green,
     );
-    pathGroup.add(growthMarker);
+    chartGroup.add(growthMarker);
 
     const grid = new THREE.GridHelper(18, 22, 0x4bb962, 0x80a98a);
-    grid.position.set(1.8, -1.5, -1.4);
+    grid.position.set(0.4, chartBase - 0.03, -1.25);
     grid.material.transparent = true;
     grid.material.opacity = 0.22;
     world.add(grid);
 
-    const globeRadius = 0.92;
-    const globeGeometry = new THREE.WireframeGeometry(new THREE.SphereGeometry(globeRadius, 24, 14));
-    globeGroup.add(new THREE.LineSegments(globeGeometry, materials.globe));
-
-    const pointFromCoordinates = (latitude, longitude, radius) => {
-      const phi = THREE.MathUtils.degToRad(90 - latitude);
-      const theta = THREE.MathUtils.degToRad(longitude + 180);
-      return new THREE.Vector3(
-        -radius * Math.sin(phi) * Math.cos(theta),
-        radius * Math.cos(phi),
-        radius * Math.sin(phi) * Math.sin(theta),
-      );
-    };
-
-    const colombia = pointFromCoordinates(4.57, -74.3, globeRadius * 1.01);
-    const australia = pointFromCoordinates(-33.87, 151.21, globeRadius * 1.01);
-    const routePeak = colombia.clone().add(australia).normalize().multiplyScalar(globeRadius * 1.55);
-    const routeCurve = new THREE.QuadraticBezierCurve3(colombia, routePeak, australia);
-    const route = new THREE.Mesh(
-      new THREE.TubeGeometry(routeCurve, 42, 0.018, 6, false),
-      materials.route,
-    );
-    globeGroup.add(route);
-
-    for (const point of [colombia, australia]) {
-      const marker = new THREE.Mesh(new THREE.OctahedronGeometry(0.075, 0), materials.green);
-      marker.position.copy(point);
-      globeGroup.add(marker);
-    }
-
-    globeGroup.position.set(-2.65, 1.72, -0.8);
-    globeGroup.rotation.set(0.08, -0.52, -0.08);
-
     const updatePalette = () => {
       const green = readColor("--green", "#13c636");
       const deep = readColor("--green-deep", "#087a2a");
-      const surface = readColor("--surface-raised", "#f6fbf5");
       const line = readColor("--line", "#cfe2cf");
       materials.green.color.copy(green);
       materials.green.emissive.copy(green);
-      materials.surface.color.copy(surface);
-      materials.stepAccent.color.copy(green);
-      materials.stepAccent.emissive.copy(green);
-      materials.stepEdge.color.copy(deep);
+      materials.bar.color.copy(green);
+      materials.bar.emissive.copy(green);
+      materials.barAccent.color.copy(green);
+      materials.barAccent.emissive.copy(green);
+      materials.barEdge.color.copy(deep);
       materials.route.color.copy(green);
       materials.routeGlow.color.copy(green);
-      materials.globe.color.copy(deep);
       grid.material.color.copy(line);
       renderFrame(0);
     };
@@ -200,7 +170,6 @@ if (host && canvas) {
       pointer.lerp(pointerTarget, motionEnabled ? 0.035 : 1);
       world.rotation.y = pointer.x * 0.035;
       world.rotation.x = pointer.y * 0.018;
-      globeGroup.rotation.y = -0.52 + (motionEnabled ? elapsed * 0.035 : 0);
       growthMarker.position.copy(growthCurve.getPointAt(motionEnabled ? (elapsed * 0.035) % 1 : 0.72));
       growthMarker.rotation.y = elapsed * 0.7;
       renderer.render(scene, camera);
