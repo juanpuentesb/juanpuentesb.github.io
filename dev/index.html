@@ -18,8 +18,9 @@
     <title>Juan Puentes | Long-Term Investor</title>
     <link rel="canonical" href="https://juanpuentesb.github.io/">
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="styles.css?v=20260831-compliance">
-    <script defer src="script.js?v=20260831-compliance"></script>
+    <link rel="stylesheet" href="styles.css?v=20260902-growth-path">
+    <script defer src="script.js?v=20260902-growth-path"></script>
+    <script type="module" src="hero-scene.js?v=20260902-growth-path"></script>
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -80,6 +81,14 @@
 
     <main id="main">
       <section class="hero" id="top" aria-labelledby="hero-title">
+        <div class="hero-scene" data-hero-scene aria-hidden="true">
+          <canvas class="hero-scene-canvas"></canvas>
+          <div class="hero-route-detail">
+            <span>COL</span>
+            <span class="hero-route-line"></span>
+            <span>AUS</span>
+          </div>
+        </div>
         <div class="hero-inner">
           <div class="hero-copy">
             <p class="eyebrow" data-i18n="heroEyebrow">My investor profile</p>
@@ -90,9 +99,14 @@
               risk control.
             </p>
 
-            <nav class="hero-actions" aria-label="Profile links">
-              <a class="button button-primary" href="https://www.etoro.com/people/juanpuentesb" target="_blank" rel="noopener noreferrer">
-                <span data-i18n="viewEtoro">View eToro profile</span>
+            <nav class="hero-actions" aria-label="Profile and contact links">
+              <a
+                class="button button-primary"
+                href="https://calendly.com/j-puentesb?utm_source=juanpuentesb.com&amp;utm_medium=website&amp;utm_campaign=connect&amp;utm_content=hero"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span data-i18n="connectWithMe">Connect with me</span>
               </a>
               <a class="button button-secondary" href="https://www.instagram.com/juanpuentesb/" target="_blank" rel="noopener noreferrer">
                 <span data-i18n="followInstagram">Follow on Instagram</span>
@@ -339,10 +353,11 @@
       <section class="section" id="connect" aria-labelledby="connect-title">
         <div class="section-header">
           <p class="eyebrow" data-i18n="connectEyebrow">Connect</p>
-          <h2 id="connect-title" data-i18n="connectTitle">Send me a message.</h2>
+          <h2 id="connect-title" data-i18n="connectTitle">Connect with me.</h2>
           <p data-i18n="connectIntro">
             Tell me where you are from and where you are currently located, then use one contact
-            channel. Start with Instagram and wait for a reply before trying TikTok or email.
+            channel. Start with Instagram and wait for a reply before trying TikTok, or choose a
+            time directly with Calendly.
           </p>
         </div>
 
@@ -401,17 +416,14 @@
             <p class="eyebrow" data-i18n="contactChannelsEyebrow">One channel at a time</p>
             <h3 data-i18n="contactChannelsTitle">Start with Instagram.</h3>
             <p data-i18n="contactChannelsText">
-              Please use one option and wait for a reply. Move to the next only if the previous
-              channel is unavailable.
+              Please use one option and wait for a reply. If social messaging is unavailable, use
+              Calendly to choose a time.
             </p>
             <article class="contact-route-card" aria-live="polite">
               <span class="contact-route-step" data-contact-route-step>Option 1 of 3</span>
               <div class="contact-route-copy">
                 <strong data-contact-route-name>Instagram</strong>
                 <p data-contact-route-description>My preferred contact channel.</p>
-                <a class="contact-email-address" href="mailto:j.puentesb@hotmail.com" data-contact-email-address hidden>
-                  j.puentesb@hotmail.com
-                </a>
               </div>
               <a
                 class="button button-primary contact-route-action"

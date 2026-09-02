@@ -15,11 +15,9 @@
   const contactRouteStep = document.querySelector("[data-contact-route-step]");
   const contactRouteName = document.querySelector("[data-contact-route-name]");
   const contactRouteDescription = document.querySelector("[data-contact-route-description]");
-  const contactEmailAddress = document.querySelector("[data-contact-email-address]");
   const contactAction = document.querySelector("[data-contact-action]");
   const contactPrevious = document.querySelector("[data-contact-previous]");
   const contactNext = document.querySelector("[data-contact-next]");
-  const publicContactEmail = "j.puentesb@hotmail.com";
   const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Local time";
 
   const translations = {
@@ -39,7 +37,7 @@
       heroTitle: "Long-term investing, built with discipline.",
       heroLede:
         "I'm Juan Puentes Botero, a Colombian investor living in Australia. I share a practical investing journey centered on stability, innovation, DCA, ETF foundations, and smart risk control.",
-      viewEtoro: "View eToro profile",
+      connectWithMe: "Connect with me",
       followInstagram: "Follow on Instagram",
       followTiktok: "Follow on TikTok",
       verifiedProfile: "Verified profile",
@@ -96,9 +94,9 @@
       quoteText:
         "For me, these words mean patient action, education, and discipline over shortcuts.",
       connectEyebrow: "Connect",
-      connectTitle: "Send me a message.",
+      connectTitle: "Connect with me.",
       connectIntro:
-        "Tell me where you are from and where you are currently located, then use one contact channel. Start with Instagram and wait for a reply before trying TikTok or email.",
+        "Tell me where you are from and where you are currently located, then use one contact channel. Start with Instagram and wait for a reply before trying TikTok, or choose a time directly with Calendly.",
       messageDraftEyebrow: "Message draft",
       messageDraftTitle: "A friendly introduction",
       messageLocationIntro:
@@ -121,21 +119,19 @@
       contactChannelsEyebrow: "One channel at a time",
       contactChannelsTitle: "Start with Instagram.",
       contactChannelsText:
-        "Please use one option and wait for a reply. Move to the next only if the previous channel is unavailable.",
+        "Please use one option and wait for a reply. If social messaging is unavailable, use Calendly to choose a time.",
       contactOptionLabel: "Option",
       contactOptionOf: "of",
       contactInstagramText: "My preferred contact channel.",
       contactTiktokText: "Use only if Instagram is unavailable.",
-      contactEmailTitle: "Email",
-      contactEmailText: "Use email only if neither social channel is available.",
-      contactEmailSubject: "Website message",
+      contactCalendlyTitle: "Calendly",
+      contactCalendlyText: "Choose a time directly if social messaging is unavailable.",
       openInstagram: "Copy & open Instagram",
       openTiktok: "Copy & open TikTok",
-      openEmail: "Open email",
-      emailPending: "Public email needed",
+      openCalendly: "Choose a time",
       contactPrevious: "Previous option",
       contactTryTiktok: "Instagram unavailable? Try TikTok",
-      contactTryEmail: "TikTok unavailable? Try email",
+      contactTryCalendly: "TikTok unavailable? Try Calendly",
       tiktokManualNote: "Reviewed public TikTok profile stats",
       navHome: "Home",
       bioReadMore: "Read more",
@@ -175,7 +171,7 @@
       heroTitle: "Inversión a largo plazo, construida con disciplina.",
       heroLede:
         "Soy Juan Puentes Botero, un inversionista colombiano que vive en Australia. Comparto un camino práctico de inversión basado en estabilidad, innovación, DCA, ETFs como base y control inteligente del riesgo.",
-      viewEtoro: "Ver perfil de eToro",
+      connectWithMe: "Conecta conmigo",
       followInstagram: "Seguir en Instagram",
       followTiktok: "Seguir en TikTok",
       verifiedProfile: "Perfil verificado",
@@ -232,9 +228,9 @@
       quoteText:
         "Para mí, estas palabras significan acción paciente, educación y disciplina por encima de los atajos.",
       connectEyebrow: "Conectar",
-      connectTitle: "Env\u00edame un mensaje.",
+      connectTitle: "Conecta conmigo.",
       connectIntro:
-        "Cu\u00e9ntame de d\u00f3nde eres y d\u00f3nde te encuentras actualmente. Usa un solo canal: empieza por Instagram y espera una respuesta antes de probar TikTok o correo.",
+        "Cu\u00e9ntame de d\u00f3nde eres y d\u00f3nde te encuentras actualmente. Empieza por Instagram y espera una respuesta antes de probar TikTok, o elige una hora directamente con Calendly.",
       messageDraftEyebrow: "Borrador del mensaje",
       messageDraftTitle: "Una presentaci\u00f3n amable",
       messageLocationIntro:
@@ -257,21 +253,19 @@
       contactChannelsEyebrow: "Un canal a la vez",
       contactChannelsTitle: "Empieza por Instagram.",
       contactChannelsText:
-        "Usa una sola opci\u00f3n y espera una respuesta. Pasa a la siguiente solo si el canal anterior no est\u00e1 disponible.",
+        "Usa una sola opci\u00f3n y espera una respuesta. Si los mensajes sociales no est\u00e1n disponibles, usa Calendly para elegir una hora.",
       contactOptionLabel: "Opci\u00f3n",
       contactOptionOf: "de",
       contactInstagramText: "Mi canal de contacto preferido.",
       contactTiktokText: "Usa TikTok solo si Instagram no est\u00e1 disponible.",
-      contactEmailTitle: "Correo",
-      contactEmailText: "Usa el correo solo si ninguna red social est\u00e1 disponible.",
-      contactEmailSubject: "Mensaje desde el sitio web",
+      contactCalendlyTitle: "Calendly",
+      contactCalendlyText: "Elige una hora directamente si los mensajes sociales no est\u00e1n disponibles.",
       openInstagram: "Copiar y abrir Instagram",
       openTiktok: "Copiar y abrir TikTok",
-      openEmail: "Abrir correo",
-      emailPending: "Falta el correo p\u00fablico",
+      openCalendly: "Elegir una hora",
       contactPrevious: "Opci\u00f3n anterior",
       contactTryTiktok: "\u00bfInstagram no est\u00e1 disponible? Prueba TikTok",
-      contactTryEmail: "\u00bfTikTok no est\u00e1 disponible? Prueba el correo",
+      contactTryCalendly: "\u00bfTikTok no est\u00e1 disponible? Prueba Calendly",
       tiktokManualNote: "Estadísticas públicas revisadas de TikTok",
       navHome: "Inicio",
       bioReadMore: "Leer más",
@@ -346,10 +340,11 @@
       type: "social",
     },
     {
-      nameKey: "contactEmailTitle",
-      descriptionKey: "contactEmailText",
-      actionKey: "openEmail",
-      type: "email",
+      nameKey: "contactCalendlyTitle",
+      descriptionKey: "contactCalendlyText",
+      actionKey: "openCalendly",
+      url: "https://calendly.com/j-puentesb?utm_source=juanpuentesb.com&utm_medium=website&utm_campaign=connect&utm_content=contact_section",
+      type: "booking",
     },
   ];
 
@@ -395,24 +390,9 @@
       contactRouteDescription.textContent = translate(route.descriptionKey);
     }
 
-    const isEmail = route.type === "email";
-    if (contactEmailAddress) {
-      contactEmailAddress.hidden = !isEmail;
-      contactEmailAddress.href = `mailto:${publicContactEmail}`;
-      contactEmailAddress.textContent = publicContactEmail;
-    }
-
-    if (isEmail) {
-      const subject = encodeURIComponent(translate("contactEmailSubject"));
-      const body = encodeURIComponent(contactMessage?.value.trim() || buildContactMessage());
-      contactAction.href = `mailto:${publicContactEmail}?subject=${subject}&body=${body}`;
-      contactAction.removeAttribute("target");
-      contactAction.removeAttribute("rel");
-    } else {
-      contactAction.href = route.url;
-      contactAction.target = "_blank";
-      contactAction.rel = "noopener noreferrer";
-    }
+    contactAction.href = route.url;
+    contactAction.target = "_blank";
+    contactAction.rel = "noopener noreferrer";
     contactAction.textContent = translate(route.actionKey);
 
     if (contactPrevious) {
@@ -421,7 +401,7 @@
     if (contactNext) {
       contactNext.hidden = activeContactRoute === contactRoutes.length - 1;
       contactNext.textContent =
-        activeContactRoute === 0 ? translate("contactTryTiktok") : translate("contactTryEmail");
+        activeContactRoute === 0 ? translate("contactTryTiktok") : translate("contactTryCalendly");
     }
   };
 
@@ -954,13 +934,9 @@
   });
 
   contactAction?.addEventListener("click", (event) => {
-    if (!ensureLocationDetails()) {
-      event.preventDefault();
-      return;
-    }
-    if (contactRoutes[activeContactRoute]?.type === "social") {
-      void copyContactMessage();
-    }
+    if (contactRoutes[activeContactRoute]?.type !== "social") return;
+    if (ensureLocationDetails()) void copyContactMessage();
+    else event.preventDefault();
   });
 
   contactPrevious?.addEventListener("click", () => {
