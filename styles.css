@@ -316,16 +316,17 @@ img {
   content: "";
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--surface) 99%, transparent) 0%,
-    color-mix(in srgb, var(--surface) 88%, transparent) 48%,
-    transparent 78%
+    color-mix(in srgb, var(--surface) 66%, transparent) 0%,
+    color-mix(in srgb, var(--surface) 74%, transparent) 48%,
+    transparent 66%
   );
 }
 
 .hero-scene {
   position: absolute;
-  inset: 0;
+  inset: 0 auto 0 0;
   z-index: 0;
+  width: min(100%, calc(50% + 170px));
   overflow: hidden;
   pointer-events: none;
 }
@@ -1664,6 +1665,10 @@ html[lang="en"] .profile-risk-original {
       color-mix(in srgb, var(--surface) 82%, transparent) 46%,
       transparent 76%
     );
+  }
+
+  .hero-scene {
+    width: 100%;
   }
 
   .profile-panel {
