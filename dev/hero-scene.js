@@ -36,8 +36,8 @@ if (host && canvas) {
 
     scene.add(world);
     world.add(pathGroup, globeGroup);
-    camera.position.set(0.15, 1.25, 9.6);
-    camera.lookAt(1.35, -0.2, -0.8);
+    camera.position.set(0, 1.25, 9.6);
+    camera.lookAt(0, -0.18, -0.8);
 
     const readColor = (property, fallback) => {
       const value = getComputedStyle(document.documentElement).getPropertyValue(property).trim();
@@ -74,10 +74,10 @@ if (host && canvas) {
         transparent: true,
         opacity: 0.36,
       });
-      materials.stepEdge = new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.38 });
+      materials.stepEdge = new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.58 });
       materials.route = new THREE.MeshBasicMaterial({ color: green, transparent: true, opacity: 0.9 });
       materials.routeGlow = new THREE.MeshBasicMaterial({ color: green, transparent: true, opacity: 0.12 });
-      materials.globe = new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.24 });
+      materials.globe = new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.46 });
     };
 
     makeMaterials();
@@ -118,7 +118,7 @@ if (host && canvas) {
       materials.route,
     );
     pathGroup.add(growthPath);
-    pathGroup.position.set(1.08, 0.08, 0);
+    pathGroup.position.set(-2.45, -0.08, 0);
 
     const growthMarker = new THREE.Mesh(
       new THREE.OctahedronGeometry(0.12, 0),
@@ -129,7 +129,7 @@ if (host && canvas) {
     const grid = new THREE.GridHelper(18, 22, 0x4bb962, 0x80a98a);
     grid.position.set(1.8, -1.5, -1.4);
     grid.material.transparent = true;
-    grid.material.opacity = 0.15;
+    grid.material.opacity = 0.22;
     world.add(grid);
 
     const globeRadius = 0.92;
@@ -162,7 +162,7 @@ if (host && canvas) {
       globeGroup.add(marker);
     }
 
-    globeGroup.position.set(5.35, 1.75, -1.15);
+    globeGroup.position.set(-2.65, 1.72, -0.8);
     globeGroup.rotation.set(0.08, -0.52, -0.08);
 
     const updatePalette = () => {
@@ -190,7 +190,7 @@ if (host && canvas) {
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
-      world.position.x = width < 980 ? -0.7 : 0.35;
+      world.position.x = width < 720 ? -0.25 : 0;
       world.scale.setScalar(width < 720 ? 0.82 : 1);
       renderFrame(0);
     };
