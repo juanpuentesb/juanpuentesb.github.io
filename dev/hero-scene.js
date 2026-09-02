@@ -26,8 +26,6 @@ if (host && canvas) {
     const world = new THREE.Group();
     const chartGroup = new THREE.Group();
     const clock = new THREE.Clock();
-    const pointer = new THREE.Vector2();
-    const pointerTarget = new THREE.Vector2();
     const materials = {};
     let isVisible = true;
     let frameId = 0;
@@ -91,24 +89,21 @@ if (host && canvas) {
       : [0.48, 0.74, 0.63, 1.02, 0.9, 1.32, 1.18, 1.58, 1.92];
     const chartPoints = [];
     const chartBase = -1.5;
-    const chartStart = -3.25;
-    const chartSpacing = compactViewport.matches ? 0.92 : 0.82;
+    const chartStart = -3.35;
+    const chartSpacing = compactViewport.matches ? 0.88 : 0.75;
 
     chartValues.forEach((value, index) => {
-      const progress = index / (chartValues.length - 1);
       const height = value * 1.38;
-      const geometry = new THREE.BoxGeometry(0.54, height, 0.68);
+      const geometry = new THREE.BoxGeometry(0.54, height, 0.34);
       const material = index === chartValues.length - 1 ? materials.barAccent : materials.bar;
       const bar = new THREE.Mesh(geometry, material);
-      bar.position.set(chartStart + index * chartSpacing, chartBase + height / 2, 1.25 - progress * 2.7);
-      bar.rotation.y = -0.08;
+      bar.position.set(chartStart + index * chartSpacing, chartBase + height / 2, -0.2);
       chartGroup.add(bar);
 
       const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geometry), materials.barEdge);
       edges.position.copy(bar.position);
-      edges.rotation.copy(bar.rotation);
       chartGroup.add(edges);
-      chartPoints.push(new THREE.Vector3(bar.position.x, chartBase + height + 0.1, bar.position.z));
+      chartPoints.push(new THREE.Vector3(bar.position.x, chartBase + height + 0.1, 0.02));
     });
 
     const growthCurve = new THREE.CatmullRomCurve3(chartPoints, false, "catmullrom", 0.22);
@@ -122,7 +117,7 @@ if (host && canvas) {
       materials.route,
     );
     chartGroup.add(growthPath);
-    chartGroup.position.set(0.55, -0.03, 0);
+    chartGroup.position.set(0.25, -0.03, 0);
 
     const growthMarker = new THREE.Mesh(
       new THREE.OctahedronGeometry(0.12, 0),
@@ -167,9 +162,6 @@ if (host && canvas) {
 
     function renderFrame(elapsed) {
       const motionEnabled = !reducedMotion.matches && !compactViewport.matches;
-      pointer.lerp(pointerTarget, motionEnabled ? 0.035 : 1);
-      world.rotation.y = pointer.x * 0.035;
-      world.rotation.x = pointer.y * 0.018;
       growthMarker.position.copy(growthCurve.getPointAt(motionEnabled ? (elapsed * 0.035) % 1 : 0.72));
       growthMarker.rotation.y = elapsed * 0.7;
       renderer.render(scene, camera);
@@ -195,13 +187,6 @@ if (host && canvas) {
       }
     };
 
-    const handlePointer = (event) => {
-      const bounds = host.getBoundingClientRect();
-      pointerTarget.x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
-      pointerTarget.y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
-    };
-
-    const resetPointer = () => pointerTarget.set(0, 0);
     const observer = new IntersectionObserver(([entry]) => {
       isVisible = entry.isIntersecting;
       syncAnimation();
@@ -219,9 +204,6 @@ if (host && canvas) {
       syncAnimation();
     });
     document.addEventListener("visibilitychange", syncAnimation);
-    host.closest(".hero")?.addEventListener("pointermove", handlePointer, { passive: true });
-    host.closest(".hero")?.addEventListener("pointerleave", resetPointer, { passive: true });
-
     resize();
     syncAnimation();
 
