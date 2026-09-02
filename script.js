@@ -37,6 +37,7 @@
       heroTitle: "Long-term investing, built with discipline.",
       heroLede:
         "I'm Juan Puentes Botero, a Colombian investor living in Australia. I share a practical investing journey centered on stability, innovation, DCA, ETF foundations, and smart risk control.",
+      heroChartLabel: "Illustrative long-term growth",
       connectWithMe: "Connect with me",
       followInstagram: "Follow on Instagram",
       followTiktok: "Follow on TikTok",
@@ -171,6 +172,7 @@
       heroTitle: "Inversión a largo plazo, construida con disciplina.",
       heroLede:
         "Soy Juan Puentes Botero, un inversionista colombiano que vive en Australia. Comparto un camino práctico de inversión basado en estabilidad, innovación, DCA, ETFs como base y control inteligente del riesgo.",
+      heroChartLabel: "Crecimiento ilustrativo a largo plazo",
       connectWithMe: "Conecta conmigo",
       followInstagram: "Seguir en Instagram",
       followTiktok: "Seguir en TikTok",
