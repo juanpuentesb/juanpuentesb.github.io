@@ -76,6 +76,12 @@ if (host && canvas) {
       materials.barEdge = new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.62 });
       materials.route = new THREE.MeshBasicMaterial({ color: green, transparent: true, opacity: 0.9 });
       materials.routeGlow = new THREE.MeshBasicMaterial({ color: green, transparent: true, opacity: 0.18 });
+      materials.routeArrow = new THREE.MeshBasicMaterial({
+        color: green,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+        depthTest: true,
+      });
       materials.globe = new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.22 });
       materials.continentOutline = new THREE.LineBasicMaterial({ color: green, transparent: true, opacity: 0.5 });
       materials.country = new THREE.MeshBasicMaterial({
@@ -263,13 +269,54 @@ if (host && canvas) {
       [144.6, -40.7], [148.4, -40.8], [148.3, -43.6], [146.1, -43.8],
     ], [146.4, -42.3]);
 
-    const routePeak = colombiaCenter.clone().add(australiaCenter).normalize().multiplyScalar(globeRadius * 1.45);
-    const countryRoute = new THREE.QuadraticBezierCurve3(australiaCenter, routePeak, colombiaCenter);
+    const routeStart = colombiaCenter.clone().normalize();
+    const routeEnd = australiaCenter.clone().normalize();
+    const routeAngle = Math.acos(THREE.MathUtils.clamp(routeStart.dot(routeEnd), -1, 1));
+    const routeAngleSine = Math.sin(routeAngle);
+    const routePoints = Array.from({ length: 65 }, (_, index) => {
+      const progress = index / 64;
+      const startWeight = Math.sin((1 - progress) * routeAngle) / routeAngleSine;
+      const endWeight = Math.sin(progress * routeAngle) / routeAngleSine;
+      const altitude = globeRadius * (1.07 + Math.sin(Math.PI * progress) * 0.26);
+      return routeStart.clone()
+        .multiplyScalar(startWeight)
+        .add(routeEnd.clone().multiplyScalar(endWeight))
+        .normalize()
+        .multiplyScalar(altitude);
+    });
+    const countryRoute = new THREE.CatmullRomCurve3(routePoints, false, "catmullrom", 0.42);
+    globeGroup.add(new THREE.Mesh(
+      new THREE.TubeGeometry(countryRoute, 48, 0.028, 6, false),
+      materials.routeGlow,
+    ));
     globeGroup.add(new THREE.Mesh(
       new THREE.TubeGeometry(countryRoute, 48, 0.012, 6, false),
       materials.route,
     ));
-    globeGroup.position.set(-2.45, 1.62, 0.12);
+
+    const routeArrowPosition = countryRoute.getPointAt(0.72);
+    const routeArrowDirection = countryRoute.getTangentAt(0.72).normalize();
+    const routeArrowNormal = routeArrowPosition.clone().normalize();
+    const routeArrowSide = routeArrowNormal.clone().cross(routeArrowDirection).normalize();
+    const routeArrowOffset = routeArrowNormal.clone().multiplyScalar(0.008);
+    const routeArrowTip = routeArrowPosition.clone()
+      .add(routeArrowDirection.clone().multiplyScalar(0.13))
+      .add(routeArrowOffset);
+    const routeArrowLeft = routeArrowPosition.clone()
+      .add(routeArrowDirection.clone().multiplyScalar(-0.09))
+      .add(routeArrowSide.clone().multiplyScalar(0.085))
+      .add(routeArrowOffset);
+    const routeArrowRight = routeArrowPosition.clone()
+      .add(routeArrowDirection.clone().multiplyScalar(-0.09))
+      .add(routeArrowSide.clone().multiplyScalar(-0.085))
+      .add(routeArrowOffset);
+    const routeArrowGeometry = new THREE.BufferGeometry().setFromPoints([
+      routeArrowTip,
+      routeArrowLeft,
+      routeArrowRight,
+    ]);
+    globeGroup.add(new THREE.Mesh(routeArrowGeometry, materials.routeArrow));
+    globeGroup.position.set(-2.2, 1.48, 0.12);
 
     const updatePalette = () => {
       const green = readColor("--green", "#13c636");
@@ -284,6 +331,7 @@ if (host && canvas) {
       materials.barEdge.color.copy(deep);
       materials.route.color.copy(green);
       materials.routeGlow.color.copy(green);
+      materials.routeArrow.color.copy(green);
       materials.globe.color.copy(deep);
       materials.continentOutline.color.copy(green);
       materials.country.color.copy(green);
@@ -303,7 +351,7 @@ if (host && canvas) {
       world.scale.setScalar(width < 720 ? 0.82 : 1);
       const roomyGlobe = width >= 1050;
       globeGroup.scale.setScalar(roomyGlobe ? 1 : 0.76);
-      globeGroup.position.set(roomyGlobe ? -2.45 : -2.82, roomyGlobe ? 1.62 : 1.78, 0.12);
+      globeGroup.position.set(roomyGlobe ? -2.2 : -2.62, roomyGlobe ? 1.48 : 1.66, 0.12);
       renderFrame(0);
     };
 
