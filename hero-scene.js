@@ -26,7 +26,7 @@ if (host && canvas) {
     const world = new THREE.Group();
     const chartGroup = new THREE.Group();
     const globeGroup = new THREE.Group();
-    const clock = new THREE.Clock();
+    const animationStart = performance.now();
     const materials = {};
     let isVisible = true;
     let frameId = 0;
@@ -361,10 +361,13 @@ if (host && canvas) {
       world.position.x = width < 720 ? -0.25 : 0;
       world.scale.setScalar(width < 720 ? 0.82 : 1);
 
-      const showGlobe = window.innerWidth >= 1240;
+      const showGlobe = window.innerWidth >= 981;
       globeGroup.visible = showGlobe;
       if (showGlobe) {
-        const globeScale = THREE.MathUtils.clamp(width / 1350, 0.58, 0.95);
+        const compactDesktopGlobe = window.innerWidth < 1240;
+        const globeScale = compactDesktopGlobe
+          ? 0.5
+          : THREE.MathUtils.clamp(width / 1350, 0.58, 0.95);
         globeGroup.scale.setScalar(globeScale);
 
         const planeTop = canvasPointOnPlane(width / 2, 0, width, height);
@@ -372,8 +375,8 @@ if (host && canvas) {
         const worldUnitsPerPixel = Math.abs(planeTop.y - planeBottom.y) / height;
         const radiusInPixels = (globeRadius * globeScale * world.scale.y) / worldUnitsPerPixel;
         const anchor = canvasPointOnPlane(
-          64 + radiusInPixels,
-          24 + radiusInPixels,
+          (compactDesktopGlobe ? 24 : 64) + radiusInPixels,
+          (compactDesktopGlobe ? 4 : 24) + radiusInPixels,
           width,
           height,
         );
@@ -399,7 +402,7 @@ if (host && canvas) {
       frameId = requestAnimationFrame(animate);
       if (timestamp - lastFrame < 33) return;
       lastFrame = timestamp;
-      renderFrame(clock.getElapsedTime());
+      renderFrame(Math.max(0, (timestamp - animationStart) / 1000));
     };
 
     const syncAnimation = () => {
