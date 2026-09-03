@@ -340,6 +340,17 @@ if (host && canvas) {
       renderFrame(0);
     };
 
+    const canvasPointOnPlane = (pixelX, pixelY, width, height, planeZ = 0.12) => {
+      const rayPoint = new THREE.Vector3(
+        (pixelX / width) * 2 - 1,
+        1 - (pixelY / height) * 2,
+        0.5,
+      ).unproject(camera);
+      const rayDirection = rayPoint.sub(camera.position).normalize();
+      const distance = (planeZ - camera.position.z) / rayDirection.z;
+      return camera.position.clone().add(rayDirection.multiplyScalar(distance));
+    };
+
     const resize = () => {
       const { width, height } = host.getBoundingClientRect();
       if (!width || !height) return;
@@ -349,9 +360,26 @@ if (host && canvas) {
       camera.updateProjectionMatrix();
       world.position.x = width < 720 ? -0.25 : 0;
       world.scale.setScalar(width < 720 ? 0.82 : 1);
-      const roomyGlobe = width >= 1050;
-      globeGroup.scale.setScalar(roomyGlobe ? 1 : 0.76);
-      globeGroup.position.set(roomyGlobe ? -2.2 : -2.62, roomyGlobe ? 1.48 : 1.66, 0.12);
+
+      const showGlobe = window.innerWidth >= 1240;
+      globeGroup.visible = showGlobe;
+      if (showGlobe) {
+        const globeScale = THREE.MathUtils.clamp(width / 1350, 0.58, 0.95);
+        globeGroup.scale.setScalar(globeScale);
+
+        const planeTop = canvasPointOnPlane(width / 2, 0, width, height);
+        const planeBottom = canvasPointOnPlane(width / 2, height, width, height);
+        const worldUnitsPerPixel = Math.abs(planeTop.y - planeBottom.y) / height;
+        const radiusInPixels = (globeRadius * globeScale * world.scale.y) / worldUnitsPerPixel;
+        const anchor = canvasPointOnPlane(
+          64 + radiusInPixels,
+          24 + radiusInPixels,
+          width,
+          height,
+        );
+        world.updateMatrixWorld(true);
+        globeGroup.position.copy(world.worldToLocal(anchor));
+      }
       renderFrame(0);
     };
 
