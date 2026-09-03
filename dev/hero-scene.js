@@ -25,6 +25,7 @@ if (host && canvas) {
     const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
     const world = new THREE.Group();
     const chartGroup = new THREE.Group();
+    const globeGroup = new THREE.Group();
     const clock = new THREE.Clock();
     const materials = {};
     let isVisible = true;
@@ -32,7 +33,7 @@ if (host && canvas) {
     let lastFrame = 0;
 
     scene.add(world);
-    world.add(chartGroup);
+    world.add(chartGroup, globeGroup);
     camera.position.set(0, 1.25, 9.6);
     camera.lookAt(0, -0.18, -0.8);
 
@@ -75,6 +76,21 @@ if (host && canvas) {
       materials.barEdge = new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.62 });
       materials.route = new THREE.MeshBasicMaterial({ color: green, transparent: true, opacity: 0.9 });
       materials.routeGlow = new THREE.MeshBasicMaterial({ color: green, transparent: true, opacity: 0.18 });
+      materials.globe = new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.3 });
+      materials.country = new THREE.MeshBasicMaterial({
+        color: green,
+        transparent: true,
+        opacity: 0.82,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+        depthTest: false,
+      });
+      materials.countryOutline = new THREE.LineBasicMaterial({
+        color: green,
+        transparent: true,
+        opacity: 1,
+        depthTest: false,
+      });
     };
 
     makeMaterials();
@@ -131,6 +147,74 @@ if (host && canvas) {
     grid.material.opacity = 0.22;
     world.add(grid);
 
+    const globeRadius = 0.78;
+    const globeWireframe = new THREE.LineSegments(
+      new THREE.WireframeGeometry(new THREE.SphereGeometry(globeRadius, 28, 16)),
+      materials.globe,
+    );
+    globeGroup.add(globeWireframe);
+
+    const globeCenterLongitude = -150;
+    const toGlobePoint = (longitude, latitude, radius = globeRadius * 1.018) => {
+      const longitudeFromCenter = THREE.MathUtils.degToRad(longitude - globeCenterLongitude);
+      const latitudeRadians = THREE.MathUtils.degToRad(latitude);
+      const latitudeRadius = Math.cos(latitudeRadians) * radius;
+      return new THREE.Vector3(
+        Math.sin(longitudeFromCenter) * latitudeRadius,
+        Math.sin(latitudeRadians) * radius,
+        Math.cos(longitudeFromCenter) * latitudeRadius,
+      );
+    };
+
+    const addCountryShape = (coordinates, center, displayCenter, displayScale = 1) => {
+      const displayCoordinates = coordinates.map(([longitude, latitude]) => [
+        displayCenter[0] + (longitude - center[0]) * displayScale,
+        displayCenter[1] + (latitude - center[1]) * displayScale,
+      ]);
+      const vertices = [];
+      const centerPoint = toGlobePoint(displayCenter[0], displayCenter[1], globeRadius * 1.024);
+      displayCoordinates.forEach((coordinate, index) => {
+        const next = displayCoordinates[(index + 1) % displayCoordinates.length];
+        for (const point of [centerPoint, toGlobePoint(...coordinate), toGlobePoint(...next)]) {
+          vertices.push(point.x, point.y, point.z);
+        }
+      });
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+      globeGroup.add(new THREE.Mesh(geometry, materials.country));
+
+      const outlineGeometry = new THREE.BufferGeometry().setFromPoints(
+        displayCoordinates.map((coordinate) => toGlobePoint(...coordinate, globeRadius * 1.032)),
+      );
+      globeGroup.add(new THREE.LineLoop(outlineGeometry, materials.countryOutline));
+      return centerPoint;
+    };
+
+    const colombiaCenter = addCountryShape([
+      [-78.9, 8.6], [-77.4, 8.3], [-75.7, 11.8], [-72.3, 12.1],
+      [-71.1, 10.5], [-71.7, 7.1], [-69.5, 4.2], [-69.8, 0.7],
+      [-72.1, -3.1], [-75.1, -0.8], [-77.1, 0.8], [-78.2, 4.4],
+    ], [-74.2, 4.6], [-118, 14], 1.65);
+
+    const australiaCenter = addCountryShape([
+      [113.0, -22.0], [114.0, -16.0], [122.0, -13.0], [129.0, -14.2],
+      [136.0, -12.0], [142.0, -10.8], [146.0, -16.0], [153.5, -25.5],
+      [152.0, -33.5], [146.0, -38.0], [137.0, -35.0], [131.0, -32.5],
+      [123.0, -34.0], [115.0, -29.0],
+    ], [133.5, -25.5], [-182, -18], 0.82);
+    addCountryShape([
+      [144.6, -40.7], [148.4, -40.8], [148.3, -43.6], [146.1, -43.8],
+    ], [146.4, -42.3], [-171.4, -31.8], 0.82);
+
+    const routePeak = colombiaCenter.clone().add(australiaCenter).normalize().multiplyScalar(globeRadius * 1.45);
+    const countryRoute = new THREE.QuadraticBezierCurve3(australiaCenter, routePeak, colombiaCenter);
+    globeGroup.add(new THREE.Mesh(
+      new THREE.TubeGeometry(countryRoute, 48, 0.012, 6, false),
+      materials.route,
+    ));
+    globeGroup.position.set(-2.45, 1.62, 0.12);
+
     const updatePalette = () => {
       const green = readColor("--green", "#13c636");
       const deep = readColor("--green-deep", "#087a2a");
@@ -144,6 +228,9 @@ if (host && canvas) {
       materials.barEdge.color.copy(deep);
       materials.route.color.copy(green);
       materials.routeGlow.color.copy(green);
+      materials.globe.color.copy(deep);
+      materials.country.color.copy(green);
+      materials.countryOutline.color.copy(green);
       grid.material.color.copy(line);
       renderFrame(0);
     };
@@ -157,6 +244,9 @@ if (host && canvas) {
       camera.updateProjectionMatrix();
       world.position.x = width < 720 ? -0.25 : 0;
       world.scale.setScalar(width < 720 ? 0.82 : 1);
+      const roomyGlobe = width >= 1050;
+      globeGroup.scale.setScalar(roomyGlobe ? 1 : 0.76);
+      globeGroup.position.set(roomyGlobe ? -2.45 : -2.82, roomyGlobe ? 1.62 : 1.78, 0.12);
       renderFrame(0);
     };
 
