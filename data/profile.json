@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-09-08T17:37:42.149Z",
+  "lastUpdated": "2026-09-09T17:23:19.903Z",
   "etoro": {
     "displayName": "Juan Puentes Botero",
     "username": "Juanpuentesb",
@@ -18,16 +18,17 @@
   },
   "instagram": {
     "followers": "",
-    "posts": "",
     "aumDisplay": "$910k+ AUM",
     "socialProofDetail": "Updated from Juan's public Instagram profile metadata.",
-    "summary": "5,240 followers / 214 posts"
+    "summary": "5,240 followers / 214 posts",
+    "posts": "",
+    "error": "429 Too Many Requests"
   },
   "tiktok": {
     "following": "152",
-    "followers": "7,858",
-    "likes": "56,000",
-    "summary": "152 following / 7,858 followers / 56,000 likes",
+    "followers": "7,977",
+    "likes": "56,800",
+    "summary": "152 following / 7,977 followers / 56,800 likes",
     "sourceNote": "Updated from Juan's public TikTok profile page.",
     "title": "Juan Puentes on TikTok",
     "isBlocked": false
