@@ -18,8 +18,8 @@ export default defineConfig({
       this.emitFile({
         type: "asset",
         fileName: "third-party-licenses.txt",
-        source: ["three", "vite"].map((name) =>
-          name + "\n\n" + readFileSync(new URL(`node_modules/${name}/LICENSE`, import.meta.url), "utf8"),
+        source: ["three/LICENSE", "vite/LICENSE.md"].map((path) =>
+          path + "\n\n" + readFileSync(new URL(`node_modules/${path}`, import.meta.url), "utf8"),
         ).join("\n\n"),
       });
     },
