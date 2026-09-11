@@ -15,6 +15,13 @@ export default defineConfig({
           source: readFileSync(new URL(fileName, import.meta.url)),
         });
       }
+      this.emitFile({
+        type: "asset",
+        fileName: "third-party-licenses.txt",
+        source: ["three", "vite"].map((name) =>
+          name + "\n\n" + readFileSync(new URL(`node_modules/${name}/LICENSE`, import.meta.url), "utf8"),
+        ).join("\n\n"),
+      });
     },
   }],
 });
