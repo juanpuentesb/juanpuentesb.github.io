@@ -23,6 +23,23 @@ jobs:
           ref: dev
           path: dev-site
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: dev-site/package-lock.json
+
+      - name: Install dependencies
+        working-directory: dev-site
+        run: npm ci
+
+      - name: Check data contracts and build TypeScript site
+        working-directory: dev-site
+        run: |
+          npm test
+          npm run build
+
       - name: Check out production branch
         uses: actions/checkout@v4
         with:
@@ -33,13 +50,7 @@ jobs:
         run: |
           rm -rf production-site/dev
           mkdir -p production-site/dev
-          rsync -av --delete \
-            --exclude ".git" \
-            --exclude ".github" \
-            --exclude ".gitignore" \
-            --exclude "dev" \
-            --exclude "*.zip" \
-            dev-site/ production-site/dev/
+          rsync -av --delete dev-site/dist/ production-site/dev/
 
       - name: Commit preview update
         working-directory: production-site

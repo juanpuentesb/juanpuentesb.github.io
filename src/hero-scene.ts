@@ -1,15 +1,17 @@
-import * as THREE from "./vendor/three.module.min.js";
+import * as THREE from "three";
 
-const host = document.querySelector("[data-hero-scene]");
+type Coordinate = [longitude: number, latitude: number];
+
+const host = document.querySelector<HTMLElement>("[data-hero-scene]");
 const canvas = host?.querySelector("canvas");
 
 if (host && canvas) {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const compactViewport = window.matchMedia("(max-width: 720px)");
-  let renderer;
+  let candidateRenderer: THREE.WebGLRenderer | undefined;
 
   try {
-    renderer = new THREE.WebGLRenderer({
+    candidateRenderer = new THREE.WebGLRenderer({
       canvas,
       alpha: true,
       antialias: !compactViewport.matches,
@@ -19,7 +21,8 @@ if (host && canvas) {
     host.dataset.renderer = "unavailable";
   }
 
-  if (renderer) {
+  if (candidateRenderer) {
+    const renderer = candidateRenderer;
     host.dataset.renderer = "ready";
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
@@ -27,7 +30,6 @@ if (host && canvas) {
     const chartGroup = new THREE.Group();
     const globeGroup = new THREE.Group();
     const animationStart = performance.now();
-    const materials = {};
     let isVisible = true;
     let frameId = 0;
     let lastFrame = 0;
@@ -37,7 +39,7 @@ if (host && canvas) {
     camera.position.set(0, 1.25, 9.6);
     camera.lookAt(0, -0.18, -0.8);
 
-    const readColor = (property, fallback) => {
+    const readColor = (property: string, fallback: string) => {
       const value = getComputedStyle(document.documentElement).getPropertyValue(property).trim();
       const color = new THREE.Color();
       color.setStyle(value || fallback);
@@ -48,59 +50,61 @@ if (host && canvas) {
       const green = readColor("--green", "#13c636");
       const deep = readColor("--green-deep", "#087a2a");
 
-      materials.green = new THREE.MeshStandardMaterial({
-        color: green,
-        emissive: green,
-        emissiveIntensity: 0.08,
-        metalness: 0.05,
-        roughness: 0.5,
-      });
-      materials.bar = new THREE.MeshStandardMaterial({
-        color: green,
-        emissive: green,
-        emissiveIntensity: 0.035,
-        metalness: 0.04,
-        roughness: 0.58,
-        transparent: true,
-        opacity: 0.2,
-      });
-      materials.barAccent = new THREE.MeshStandardMaterial({
-        color: green,
-        emissive: green,
-        emissiveIntensity: 0.08,
-        metalness: 0.04,
-        roughness: 0.52,
-        transparent: true,
-        opacity: 0.44,
-      });
-      materials.barEdge = new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.62 });
-      materials.route = new THREE.MeshBasicMaterial({ color: green, transparent: true, opacity: 0.9 });
-      materials.routeGlow = new THREE.MeshBasicMaterial({ color: green, transparent: true, opacity: 0.18 });
-      materials.routeArrow = new THREE.MeshBasicMaterial({
-        color: green,
-        side: THREE.DoubleSide,
-        depthWrite: false,
-        depthTest: true,
-      });
-      materials.globe = new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.22 });
-      materials.continentOutline = new THREE.LineBasicMaterial({ color: green, transparent: true, opacity: 0.5 });
-      materials.country = new THREE.MeshBasicMaterial({
-        color: green,
-        transparent: true,
-        opacity: 0.82,
-        side: THREE.DoubleSide,
-        depthWrite: false,
-        depthTest: true,
-      });
-      materials.countryOutline = new THREE.LineBasicMaterial({
-        color: green,
-        transparent: true,
-        opacity: 1,
-        depthTest: true,
-      });
+      return {
+        green: new THREE.MeshStandardMaterial({
+          color: green,
+          emissive: green,
+          emissiveIntensity: 0.08,
+          metalness: 0.05,
+          roughness: 0.5,
+        }),
+        bar: new THREE.MeshStandardMaterial({
+          color: green,
+          emissive: green,
+          emissiveIntensity: 0.035,
+          metalness: 0.04,
+          roughness: 0.58,
+          transparent: true,
+          opacity: 0.2,
+        }),
+        barAccent: new THREE.MeshStandardMaterial({
+          color: green,
+          emissive: green,
+          emissiveIntensity: 0.08,
+          metalness: 0.04,
+          roughness: 0.52,
+          transparent: true,
+          opacity: 0.44,
+        }),
+        barEdge: new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.62 }),
+        route: new THREE.MeshBasicMaterial({ color: green, transparent: true, opacity: 0.9 }),
+        routeGlow: new THREE.MeshBasicMaterial({ color: green, transparent: true, opacity: 0.18 }),
+        routeArrow: new THREE.MeshBasicMaterial({
+          color: green,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+          depthTest: true,
+        }),
+        globe: new THREE.LineBasicMaterial({ color: deep, transparent: true, opacity: 0.22 }),
+        continentOutline: new THREE.LineBasicMaterial({ color: green, transparent: true, opacity: 0.5 }),
+        country: new THREE.MeshBasicMaterial({
+          color: green,
+          transparent: true,
+          opacity: 0.82,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+          depthTest: true,
+        }),
+        countryOutline: new THREE.LineBasicMaterial({
+          color: green,
+          transparent: true,
+          opacity: 1,
+          depthTest: true,
+        }),
+      };
     };
 
-    makeMaterials();
+    const materials = makeMaterials();
 
     scene.add(new THREE.HemisphereLight(0xffffff, 0x16321f, 2.2));
     const keyLight = new THREE.DirectionalLight(0xffffff, 2.8);
@@ -110,7 +114,7 @@ if (host && canvas) {
     const chartValues = compactViewport.matches
       ? [0.48, 0.74, 0.63, 1.02, 0.9, 1.35, 1.72]
       : [0.48, 0.74, 0.63, 1.02, 0.9, 1.32, 1.18, 1.58, 1.92];
-    const chartPoints = [];
+    const chartPoints: THREE.Vector3[] = [];
     const chartBase = -1.5;
     const chartStart = -3.35;
     const chartSpacing = compactViewport.matches ? 0.88 : 0.75;
@@ -167,7 +171,7 @@ if (host && canvas) {
     globeGroup.add(globeWireframe);
 
     const globeCenterLongitude = -85;
-    const toGlobePoint = (longitude, latitude, radius = globeRadius * 1.018) => {
+    const toGlobePoint = (longitude: number, latitude: number, radius = globeRadius * 1.018) => {
       const longitudeFromCenter = THREE.MathUtils.degToRad(longitude - globeCenterLongitude);
       const latitudeRadians = THREE.MathUtils.degToRad(latitude);
       const latitudeRadius = Math.cos(latitudeRadians) * radius;
@@ -178,14 +182,14 @@ if (host && canvas) {
       );
     };
 
-    const addContinentOutline = (coordinates) => {
+    const addContinentOutline = (coordinates: Coordinate[]) => {
       const geometry = new THREE.BufferGeometry().setFromPoints(
         coordinates.map((coordinate) => toGlobePoint(...coordinate, globeRadius * 1.014)),
       );
       globeGroup.add(new THREE.LineLoop(geometry, materials.continentOutline));
     };
 
-    const continentOutlines = [
+    const continentOutlines: Coordinate[][] = [
       [
         [-168, 72], [-150, 71], [-132, 58], [-124, 49], [-123, 40],
         [-117, 32], [-110, 27], [-102, 22], [-94, 18], [-88, 21],
@@ -232,11 +236,12 @@ if (host && canvas) {
     ];
     continentOutlines.forEach(addContinentOutline);
 
-    const addCountryShape = (coordinates, center) => {
-      const vertices = [];
+    const addCountryShape = (coordinates: Coordinate[], center: Coordinate) => {
+      const vertices: number[] = [];
       const centerPoint = toGlobePoint(center[0], center[1], globeRadius * 1.024);
       coordinates.forEach((coordinate, index) => {
         const next = coordinates[(index + 1) % coordinates.length];
+        if (!next) return;
         for (const point of [centerPoint, toGlobePoint(...coordinate), toGlobePoint(...next)]) {
           vertices.push(point.x, point.y, point.z);
         }
@@ -340,7 +345,7 @@ if (host && canvas) {
       renderFrame(0);
     };
 
-    const canvasPointOnPlane = (pixelX, pixelY, width, height, planeZ = 0.12) => {
+    const canvasPointOnPlane = (pixelX: number, pixelY: number, width: number, height: number, planeZ = 0.12) => {
       const rayPoint = new THREE.Vector3(
         (pixelX / width) * 2 - 1,
         1 - (pixelY / height) * 2,
@@ -386,7 +391,7 @@ if (host && canvas) {
       renderFrame(0);
     };
 
-    function renderFrame(elapsed) {
+    function renderFrame(elapsed: number) {
       const motionEnabled = !reducedMotion.matches && !compactViewport.matches;
       globeGroup.rotation.y = motionEnabled ? elapsed * 0.12 : 0;
       growthMarker.position.copy(growthCurve.getPointAt(motionEnabled ? (elapsed * 0.035) % 1 : 0.72));
@@ -394,7 +399,7 @@ if (host && canvas) {
       renderer.render(scene, camera);
     }
 
-    const animate = (timestamp) => {
+    const animate = (timestamp: number) => {
       if (!isVisible || document.hidden || reducedMotion.matches || compactViewport.matches) {
         frameId = 0;
         return;
@@ -415,7 +420,7 @@ if (host && canvas) {
     };
 
     const observer = new IntersectionObserver(([entry]) => {
-      isVisible = entry.isIntersecting;
+      isVisible = entry?.isIntersecting ?? false;
       syncAnimation();
     }, { threshold: 0.02 });
     observer.observe(host);

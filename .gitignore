@@ -1,1 +1,6 @@
 *.zip
+node_modules/
+dist/
+.npm-cache/
+playwright-report/
+test-results/
