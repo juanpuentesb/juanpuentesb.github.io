@@ -140,6 +140,42 @@ test("languages, theme persistence, profile bio, contact draft and referral link
   await expect(page.locator('a[href*="med.etoro.com"]')).toHaveCount(2);
 });
 
+// eToro compliance asks for a risk warning wherever a referral CTA appears (report for affiliate 126231).
+test("every eToro referral link keeps a visible risk warning", async ({ browser }, testInfo) => {
+  for (const viewport of [{ width: 1366, height: 768 }, { width: 390, height: 844 }]) {
+    const context = await browser.newContext({ viewport });
+    const page = await context.newPage();
+    await page.goto(testInfo.project.use.baseURL!);
+    const links = await page.locator('a[href*="med.etoro.com"]').all();
+    expect(links.length).toBeGreaterThan(0);
+    for (const link of links) {
+      const container = link.locator(
+        "xpath=ancestor::*[self::header or contains(concat(' ', normalize-space(@class), ' '), ' profile-content ')][1]",
+      );
+      const note = container.locator('[role="note"]');
+      await expect(note).toBeVisible();
+      await expect(note).toContainText("Your capital is at risk.", { useInnerText: true });
+    }
+    const headerCopy = page.locator(".header-risk-copy");
+    await expect(headerCopy).toHaveText(
+      viewport.width > 640
+        ? "eToro is a multi-asset investment platform. The value of your investments may go up or down. Your capital is at risk."
+        : "Your capital is at risk.",
+      { useInnerText: true },
+    );
+    await page.evaluate(() => {
+      document.documentElement.style.scrollBehavior = "auto";
+      scrollTo(0, 2400);
+    });
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(1000);
+    await expect(headerCopy).toBeInViewport();
+    await page.locator('[data-language="es"]').click();
+    await expect(headerCopy).toContainText("Tu capital está en riesgo.", { useInnerText: true });
+    await expect(page.locator(".header-risk-original")).toContainText("Your capital is at risk.", { useInnerText: true });
+    await context.close();
+  }
+});
+
 test("reduced motion keeps the scene still", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce", colorScheme: "dark" });
   await page.goto("");
