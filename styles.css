@@ -126,6 +126,32 @@ img {
   box-shadow: 0 10px 28px rgba(16, 32, 21, 0.08);
 }
 
+/* eToro risk warning for the header CTA; it sits inside the sticky header so it stays visible with it. */
+.header-risk {
+  border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-raised) 88%, transparent);
+  padding: 6px 0;
+}
+
+.header-risk p {
+  width: var(--container);
+  margin: 0 auto;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.header-risk-original {
+  margin-top: 2px;
+}
+
+html[lang="en"] .header-risk-original,
+.header-risk-short {
+  display: none;
+}
+
 .header-inner {
   width: var(--container);
   min-height: 72px;
@@ -1603,6 +1629,10 @@ html[lang="en"] .profile-risk-original {
     background: var(--surface);
   }
 
+  .header-risk {
+    background: var(--surface-raised);
+  }
+
   .button-primary:hover {
     background: var(--green);
   }
@@ -1820,6 +1850,15 @@ html[lang="en"] .profile-risk-original {
 
   .brand-role {
     display: none;
+  }
+
+  /* eToro accepts the short warning where space is limited, as in the sticky phone header. */
+  .header-risk-full {
+    display: none;
+  }
+
+  .header-risk-short {
+    display: inline;
   }
 
   .theme-toggle-text {

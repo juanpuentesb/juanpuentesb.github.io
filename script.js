@@ -33,6 +33,9 @@
       navStrategy: "Strategy",
       navConnect: "Connect",
       navStartEtoro: "Start on eToro",
+      headerRiskFull:
+        "eToro is a multi-asset investment platform. The value of your investments may go up or down. Your capital is at risk.",
+      headerRiskShort: "Your capital is at risk.",
       heroEyebrow: "My investor profile",
       heroTitle: "Long-term investing, built with discipline.",
       heroLede:
@@ -168,6 +171,9 @@
       navStrategy: "Estrategia",
       navConnect: "Conectar",
       navStartEtoro: "Empezar en eToro",
+      headerRiskFull:
+        "eToro es una plataforma de inversión multiactivos. El valor de tus inversiones puede subir o bajar. Tu capital está en riesgo.",
+      headerRiskShort: "Tu capital está en riesgo.",
       heroEyebrow: "Mi perfil de inversionista",
       heroTitle: "Inversión a largo plazo, construida con disciplina.",
       heroLede:
